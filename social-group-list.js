@@ -86,6 +86,7 @@ if (Meteor.isClient) {
 // * Angular provides the MVC framework for databinding with the UI. 
 Meteor.methods({
   addTask: function (text) {
+    //only allow user to create tasks if logged-in
     if (! Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
@@ -100,7 +101,7 @@ Meteor.methods({
   deleteTask: function (taskId) {
     var task = Tasks.findOne(taskId);
     //if task is private, make sure only the owner can delete it
-    if (task.private && task.owner !== Meteor.userId()) {
+    if (!Meteor.userId() || task.private && task.owner !== Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
     Tasks.remove(taskId);
@@ -108,7 +109,7 @@ Meteor.methods({
   setChecked: function (taskId, setChecked) {
     var task = Tasks.findOne(taskId);
     //if task is private, make sure only the owner can mark it complete
-    if (task.private && task.owner !== Meteor.userId()) {
+    if (!Meteor.userId() || task.private && task.owner !== Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
     Tasks.update(taskId, { $set: { checked: setChecked} });
